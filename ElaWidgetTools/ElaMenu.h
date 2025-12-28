@@ -26,6 +26,10 @@ public:
 
     QAction* addElaIconAction(ElaIconType::IconName icon, const QString& text);
     QAction* addElaIconAction(ElaIconType::IconName icon, const QString& text, const QKeySequence& shortcut);
+    QAction* addCheckBox(const QString& text, bool& isChecked);
+    QAction* addCheckBox(const QString& text, bool* isChecked);
+
+    Q_SIGNAL void pCheckBoxClicked(QString text, bool isChecked);
 
     bool isHasChildMenu() const;
     bool isHasIcon() const;

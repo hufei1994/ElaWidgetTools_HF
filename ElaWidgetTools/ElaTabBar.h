@@ -11,6 +11,7 @@ class ELA_EXPORT ElaTabBar : public QTabBar
     Q_OBJECT
     Q_Q_CREATE(ElaTabBar)
     Q_PROPERTY_CREATE_Q_H(QSize, TabSize)
+    Q_PROPERTY_CREATE_Q_H(bool, EnableRenaming)
 public:
     explicit ElaTabBar(QWidget* parent = nullptr);
     ~ElaTabBar() override;
@@ -23,12 +24,17 @@ Q_SIGNALS:
 protected:
     QSize sizeHint() const;
     virtual void mouseMoveEvent(QMouseEvent* event) override;
+    virtual void mouseDoubleClickEvent(QMouseEvent* event) override;
     virtual void dragEnterEvent(QDragEnterEvent* event) override;
     virtual void dragMoveEvent(QDragMoveEvent* event) override;
     virtual void dragLeaveEvent(QDragLeaveEvent* event) override;
     virtual void dropEvent(QDropEvent* event) override;
     virtual void wheelEvent(QWheelEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
+
+private:
+    void startEditing(int index);
+    void commitEditing(bool save = true);
 };
 
 #endif // ELATABBAR_H

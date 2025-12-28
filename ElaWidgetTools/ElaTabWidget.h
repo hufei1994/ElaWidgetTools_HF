@@ -17,6 +17,7 @@ public:
     explicit ElaTabWidget(QWidget* parent = nullptr);
     ~ElaTabWidget() override;
     void setTabPosition(TabPosition position);
+    void setTabRenamingEnabled(bool enabled);
 
 protected:
     virtual void paintEvent(QPaintEvent* event) override;

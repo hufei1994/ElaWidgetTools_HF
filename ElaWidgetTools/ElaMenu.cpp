@@ -7,8 +7,10 @@
 #include <QPainterPath>
 #include <QPropertyAnimation>
 #include <QVBoxLayout>
+#include <QWidgetAction>
 
 #include "DeveloperComponents/ElaMenuStyle.h"
+#include "ElaCheckBox.h"
 #include "private/ElaMenuPrivate.h"
 ElaMenu::ElaMenu(QWidget* parent)
     : QMenu(parent), d_ptr(new ElaMenuPrivate())
@@ -88,6 +90,41 @@ QAction* ElaMenu::addElaIconAction(ElaIconType::IconName icon, const QString& te
     QAction* action = new QAction(text, this);
     action->setShortcut(shortcut);
     action->setProperty("ElaIconType", QChar((unsigned short)icon));
+    QMenu::addAction(action);
+    return action;
+}
+
+QAction* ElaMenu::addCheckBox(const QString& text, bool& isChecked)
+{
+    return addCheckBox(text, &isChecked);
+}
+
+QAction* ElaMenu::addCheckBox(const QString& text, bool* isChecked)
+{
+    QWidgetAction* action = new QWidgetAction(this);
+    QWidget* widget = new QWidget(this);
+    widget->setFixedHeight(getMenuItemHeight());
+    widget->setObjectName("ElaMenuCheckBoxItem");
+    widget->setStyleSheet("#ElaMenuCheckBoxItem:hover{background-color:rgba(0, 0, 0, 0.1);}"); // 简单模拟，实际受Style控制
+    QHBoxLayout* layout = new QHBoxLayout(widget);
+    layout->setContentsMargins(10, 0, 10, 0);
+    ElaCheckBox* checkBox = new ElaCheckBox(text, widget);
+    // checkBox->setFixedHeight(20); 
+    QFont font = checkBox->font();
+    font.setPixelSize(13);
+    checkBox->setFont(font);
+    if (isChecked)
+    {
+        checkBox->setChecked(*isChecked);
+        connect(checkBox, &ElaCheckBox::clicked, this, [this, isChecked, checkBox]() {
+            *isChecked = checkBox->isChecked();
+            Q_EMIT pCheckBoxClicked(checkBox->text(), checkBox->isChecked());
+        });
+    }
+    // 拦截点击事件防止菜单关闭
+    checkBox->installEventFilter(this);
+    layout->addWidget(checkBox);
+    action->setDefaultWidget(widget);
     QMenu::addAction(action);
     return action;
 }
@@ -177,6 +214,27 @@ void ElaMenu::showEvent(QShowEvent* event)
 
     posAnimation->setEndValue(0);
     posAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+
+    // 解决嵌入式Widget动画重影问题
+    QList<QWidget*> widgets = findChildren<QWidget*>();
+    for (auto widget : widgets)
+    {
+        if (widget->parent() == this && widget->inherits("QWidget") && !widget->inherits("ElaMenu"))
+        {
+            widget->hide();
+        }
+    }
+    connect(posAnimation, &QPropertyAnimation::finished, this, [=]() {
+        QList<QWidget*> widgets = findChildren<QWidget*>();
+        for (auto widget : widgets)
+        {
+            if (widget->parent() == this && widget->inherits("QWidget") && !widget->inherits("ElaMenu"))
+            {
+                widget->show();
+            }
+        }
+    });
+
     QMenu::showEvent(event);
 }
 

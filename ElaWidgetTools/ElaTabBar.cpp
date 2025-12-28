@@ -4,6 +4,8 @@
 #include <QDrag>
 #include <QMimeData>
 #include <QMouseEvent>
+#include "ElaLineEdit.h"
+#include "ElaTabWidget.h"
 
 #include "ElaTabBarPrivate.h"
 #include "ElaTabBarStyle.h"
@@ -41,6 +43,18 @@ QSize ElaTabBar::getTabSize() const
 {
     Q_D(const ElaTabBar);
     return d->_style->getTabSize();
+}
+
+void ElaTabBar::setEnableRenaming(bool enableRenaming)
+{
+    Q_D(ElaTabBar);
+    d->_enableRenaming = enableRenaming;
+}
+
+bool ElaTabBar::getEnableRenaming() const
+{
+    Q_D(const ElaTabBar);
+    return d->_enableRenaming;
 }
 
 QSize ElaTabBar::sizeHint() const
@@ -117,6 +131,18 @@ void ElaTabBar::mouseMoveEvent(QMouseEvent* event)
     }
 }
 
+void ElaTabBar::mouseDoubleClickEvent(QMouseEvent* event)
+{
+    Q_D(ElaTabBar);
+    if (d->_enableRenaming) {
+        int index = tabAt(event->pos());
+        if (index >= 0) {
+            startEditing(index);
+        }
+    }
+    QTabBar::mouseDoubleClickEvent(event);
+}
+
 void ElaTabBar::dragEnterEvent(QDragEnterEvent* event)
 {
     Q_D(ElaTabBar);
@@ -181,6 +207,43 @@ void ElaTabBar::dropEvent(QDropEvent* event)
         Q_EMIT tabDragDrop(data);
     }
     QTabBar::dropEvent(event);
+}
+
+void ElaTabBar::startEditing(int index)
+{
+    Q_D(ElaTabBar);
+    if (d->_editingIndex >= 0) {
+        commitEditing(true);
+    }
+    if (!d->_editingLine) {
+        d->_editingLine = new ElaLineEdit(this);
+        connect(d->_editingLine, &ElaLineEdit::editingFinished, this, [this] { commitEditing(true); });
+        connect(d->_editingLine, &ElaLineEdit::returnPressed, this, [this] { commitEditing(true); });
+    }
+    d->_editingIndex = index;
+    d->_editingLine->setText(tabText(index));
+    QRect rect = tabRect(index);
+    d->_editingLine->setGeometry(rect.adjusted(4, 1, -4, -1));
+    d->_editingLine->show();
+    d->_editingLine->raise();
+    d->_editingLine->setFocus();
+    d->_editingLine->selectAll();
+}
+
+void ElaTabBar::commitEditing(bool save)
+{
+    Q_D(ElaTabBar);
+    if (d->_editingIndex < 0 || !d->_editingLine) return;
+    if (save) {
+        QString newText = d->_editingLine->text();
+        if (!newText.isEmpty()) {
+            if (ElaTabWidget* tabWidget = qobject_cast<ElaTabWidget*>(parentWidget())) {
+                tabWidget->setTabText(d->_editingIndex, newText);
+            }
+        }
+    }
+    d->_editingLine->hide();
+    d->_editingIndex = -1;
 }
 
 void ElaTabBar::wheelEvent(QWheelEvent* event)

@@ -53,6 +53,12 @@ void ElaTabWidget::setTabPosition(TabPosition position)
     }
 }
 
+void ElaTabWidget::setTabRenamingEnabled(bool enabled)
+{
+    Q_D(ElaTabWidget);
+    d->_tabBar->setEnableRenaming(enabled);
+}
+
 void ElaTabWidget::paintEvent(QPaintEvent* event)
 {
     Q_D(ElaTabWidget);
