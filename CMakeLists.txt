@@ -21,13 +21,14 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 if (${QT_VERSION} VERSION_GREATER 6.7.0 OR ${QT_VERSION} VERSION_LESS 5.12.0)
-    message(FATAL_ERROR "你当前使用的QT版本不在维护范围内！可能出现编译失败或使用时崩溃问题，推荐QT版本为QT5.15.2 QT6.6.2 QT6.6.3！请知悉~")
-    message(FATAL_ERROR "The QT version you are currently using is no longer under maintenance! There may be issues such as compilation failures or crashes during use. The recommended QT versions are QT5.15.2, QT6.6.2, and QT6.6.3! Please be advised")
+    # 将 FATAL_ERROR 改为 WARNING，允许 6.7.2 继续编译
+    message(WARNING "提示：你当前使用的QT版本 (${QT_VERSION}) 不在作者官方维护范围内！")
+    message(WARNING "The QT version you are currently using is not officially maintained by the author.")
 endif ()
 
 if (${QT_VERSION} VERSION_GREATER_EQUAL 6.5.3 AND ${QT_VERSION} VERSION_LESS_EQUAL 6.6.1)
-    message(FATAL_ERROR "你当前使用的QT版本为不推荐版本！可能出现使用时异常或崩溃问题，推荐QT版本为QT5.15.2 QT6.6.2 QT6.6.3！请知悉~")
-    message(FATAL_ERROR "The QT version you are currently using is not recommended! It may cause exceptions or crashes during operation. The recommended QT versions are QT5.15.2, QT6.6.2, and QT6.6.3! Please be advised")
+    message(WARNING "提示：你当前使用的QT版本为不推荐版本！")
+    message(WARNING "The QT version you are currently using is not recommended!")
 endif ()
 
 if (NOT WIN32)
