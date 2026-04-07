@@ -2,6 +2,7 @@
 #define ELAMENU_H
 
 #include <QMenu>
+#include <QMouseEvent>
 #include <QWidget>
 
 #include "ElaDef.h"
@@ -26,10 +27,9 @@ public:
 
     QAction* addElaIconAction(ElaIconType::IconName icon, const QString& text);
     QAction* addElaIconAction(ElaIconType::IconName icon, const QString& text, const QKeySequence& shortcut);
-    QAction* addCheckBox(const QString& text, bool& isChecked);
-    QAction* addCheckBox(const QString& text, bool* isChecked);
+    QAction* addCheckableAction(const QString& text, bool* isChecked = nullptr);
 
-    Q_SIGNAL void pCheckBoxClicked(QString text, bool isChecked);
+    Q_SIGNAL void pCheckableActionToggled(QAction* action, bool isChecked);
 
     bool isHasChildMenu() const;
     bool isHasIcon() const;
@@ -37,6 +37,7 @@ Q_SIGNALS:
     Q_SIGNAL void menuShow();
 
 protected:
+    virtual void mouseReleaseEvent(QMouseEvent* event) override;
     virtual void showEvent(QShowEvent* event) override;
     virtual void paintEvent(QPaintEvent* event) override;
 };

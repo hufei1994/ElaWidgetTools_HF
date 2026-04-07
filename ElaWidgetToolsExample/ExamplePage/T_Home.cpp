@@ -10,7 +10,6 @@
 #include "ElaAcrylicUrlCard.h"
 #include "ElaFlowLayout.h"
 #include "ElaImageCard.h"
-#include "ElaCheckBox.h"
 #include "ElaMenu.h"
 #include "ElaMessageBar.h"
 #include "ElaNavigationRouter.h"
@@ -182,8 +181,8 @@ T_Home::T_Home(QWidget* parent)
     checkMenu->addAction("查看4");
     static bool isSubCheck1 = true;
     static bool isSubCheck2 = false;
-    checkMenu->addCheckBox("二级菜单勾选1", isSubCheck1);
-    checkMenu->addCheckBox("二级菜单勾选2", isSubCheck2);
+    checkMenu->addCheckableAction("二级菜单勾选1", &isSubCheck1);
+    checkMenu->addCheckableAction("二级菜单勾选2", &isSubCheck2);
 
     ElaMenu* checkMenu1 = _homeMenu->addMenu(ElaIconType::Cubes, "查看");
     checkMenu1->addAction("查看1");
@@ -197,7 +196,7 @@ T_Home::T_Home(QWidget* parent)
     checkMenu2->addAction("查看3");
     checkMenu2->addAction("查看4");
     static bool isTriCheck1 = false;
-    checkMenu2->addCheckBox("三级菜单勾选", isTriCheck1);
+    checkMenu2->addCheckableAction("三级菜单勾选", &isTriCheck1);
 
     // QKeySequence key = QKeySequence(Qt::CTRL | Qt::Key_S);
 
@@ -217,19 +216,23 @@ T_Home::T_Home(QWidget* parent)
     static bool isCheck2 = false;
     auto printStatus = [=](ElaMenu* menu) {
         QStringList statusList;
-        QList<ElaCheckBox*> checkBoxes = menu->findChildren<ElaCheckBox*>();
-        for (auto cb : checkBoxes)
+        const QList<QAction*> actions = menu->actions();
+        for (auto action : actions)
         {
-            statusList << QString("%1: %2").arg(cb->text()).arg(cb->isChecked() ? "Checked" : "Unchecked");
+            if (!action || !action->isCheckable())
+            {
+                continue;
+            }
+            statusList << QString("%1: %2").arg(action->text()).arg(action->isChecked() ? "Checked" : "Unchecked");
         }
-        qDebug() << "Menu [" << menu->title() << "] CheckBox Status:" << statusList.join(", ");
+        qDebug() << "Menu [" << menu->title() << "] Checkable Action Status:" << statusList.join(", ");
     };
 
-    _homeMenu->addCheckBox("多选测试1", isCheck1);
-    _homeMenu->addCheckBox("多选测试2", isCheck2);
-    connect(_homeMenu, &ElaMenu::pCheckBoxClicked, this, [=]() { printStatus(_homeMenu); });
-    connect(checkMenu, &ElaMenu::pCheckBoxClicked, this, [=]() { printStatus(checkMenu); });
-    connect(checkMenu2, &ElaMenu::pCheckBoxClicked, this, [=]() { printStatus(checkMenu2); });
+    _homeMenu->addCheckableAction("多选测试1", &isCheck1);
+    _homeMenu->addCheckableAction("多选测试2", &isCheck2);
+    connect(_homeMenu, &ElaMenu::pCheckableActionToggled, this, [=]() { printStatus(_homeMenu); });
+    connect(checkMenu, &ElaMenu::pCheckableActionToggled, this, [=]() { printStatus(checkMenu); });
+    connect(checkMenu2, &ElaMenu::pCheckableActionToggled, this, [=]() { printStatus(checkMenu2); });
 
     QWidget* centralWidget = new QWidget(this);
     centralWidget->setWindowTitle("Home");

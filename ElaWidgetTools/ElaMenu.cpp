@@ -6,12 +6,10 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QPropertyAnimation>
-#include <QVBoxLayout>
-#include <QWidgetAction>
 
 #include "DeveloperComponents/ElaMenuStyle.h"
-#include "ElaCheckBox.h"
 #include "private/ElaMenuPrivate.h"
+
 ElaMenu::ElaMenu(QWidget* parent)
     : QMenu(parent), d_ptr(new ElaMenuPrivate())
 {
@@ -94,39 +92,40 @@ QAction* ElaMenu::addElaIconAction(ElaIconType::IconName icon, const QString& te
     return action;
 }
 
-QAction* ElaMenu::addCheckBox(const QString& text, bool& isChecked)
+QAction* ElaMenu::addCheckableAction(const QString& text, bool* isChecked)
 {
-    return addCheckBox(text, &isChecked);
-}
-
-QAction* ElaMenu::addCheckBox(const QString& text, bool* isChecked)
-{
-    QWidgetAction* action = new QWidgetAction(this);
-    QWidget* widget = new QWidget(this);
-    widget->setFixedHeight(getMenuItemHeight());
-    widget->setObjectName("ElaMenuCheckBoxItem");
-    widget->setStyleSheet("#ElaMenuCheckBoxItem:hover{background-color:rgba(0, 0, 0, 0.1);}"); // 简单模拟，实际受Style控制
-    QHBoxLayout* layout = new QHBoxLayout(widget);
-    layout->setContentsMargins(10, 0, 10, 0);
-    ElaCheckBox* checkBox = new ElaCheckBox(text, widget);
-    // checkBox->setFixedHeight(20); 
-    QFont font = checkBox->font();
-    font.setPixelSize(13);
-    checkBox->setFont(font);
+    QAction* action = new QAction(text, this);
+    action->setCheckable(true);
+    action->setProperty("ElaMenuKeepOpenOnTrigger", true);
     if (isChecked)
     {
-        checkBox->setChecked(*isChecked);
-        connect(checkBox, &ElaCheckBox::clicked, this, [this, isChecked, checkBox]() {
-            *isChecked = checkBox->isChecked();
-            Q_EMIT pCheckBoxClicked(checkBox->text(), checkBox->isChecked());
-        });
+        action->setChecked(*isChecked);
     }
-    // 拦截点击事件防止菜单关闭
-    checkBox->installEventFilter(this);
-    layout->addWidget(checkBox);
-    action->setDefaultWidget(widget);
+    connect(action, &QAction::toggled, this, [this, action, isChecked](bool checked) {
+        if (isChecked)
+        {
+            *isChecked = checked;
+        }
+        Q_EMIT pCheckableActionToggled(action, checked);
+    });
     QMenu::addAction(action);
     return action;
+}
+
+void ElaMenu::mouseReleaseEvent(QMouseEvent* event)
+{
+    QAction* action = actionAt(event->pos());
+    if (!action || event->button() != Qt::LeftButton ||
+        !action->property("ElaMenuKeepOpenOnTrigger").toBool() || !action->isEnabled() ||
+        !action->isCheckable())
+    {
+        QMenu::mouseReleaseEvent(event);
+        return;
+    }
+    setActiveAction(action);
+    action->toggle();
+    update(actionGeometry(action));
+    event->accept();
 }
 
 bool ElaMenu::isHasChildMenu() const
