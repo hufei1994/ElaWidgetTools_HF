@@ -7,6 +7,7 @@
 #include <QtMath>
 
 #include "ElaTheme.h"
+#include "ElaToolButton.h"
 ElaToolButtonStyle::ElaToolButtonStyle(QStyle* style)
 {
     _pIsSelected = false;
@@ -219,7 +220,19 @@ void ElaToolButtonStyle::_drawIcon(QPainter* painter, QRectF iconRect, const QSt
         {
             // 绘制ElaIcon
             painter->save();
-            if (bopt->state.testFlag(QStyle::State_Enabled))
+            const ElaToolButton* elaToolButton = qobject_cast<const ElaToolButton*>(widget);
+            const QColor customIconColor = elaToolButton ? elaToolButton->getElaIconColor()
+                                                         : QColor();
+            if (customIconColor.isValid())
+            {
+                QColor drawColor = customIconColor;
+                if (!bopt->state.testFlag(QStyle::State_Enabled))
+                {
+                    drawColor.setAlpha(110); // 禁用态保留原色倾向，同时适度降低存在感。
+                }
+                painter->setPen(drawColor);
+            }
+            else if (bopt->state.testFlag(QStyle::State_Enabled))
             {
                 painter->setPen(ElaThemeColor(_themeMode, BasicText));
             }

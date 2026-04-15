@@ -1,6 +1,7 @@
 #ifndef ELATOOLBUTTON_H
 #define ELATOOLBUTTON_H
 
+#include <QColor>
 #include <QToolButton>
 
 #include "ElaDef.h"
@@ -12,6 +13,7 @@ class ELA_EXPORT ElaToolButton : public QToolButton
     Q_Q_CREATE(ElaToolButton)
     Q_PROPERTY_CREATE_Q_H(int, BorderRadius);
     Q_PROPERTY_CREATE_Q_H(bool, IsSelected);
+    Q_PROPERTY(QColor ElaIconColor READ getElaIconColor WRITE setElaIconColor)
 
 public:
     explicit ElaToolButton(QWidget* parent = nullptr);
@@ -23,6 +25,8 @@ public:
     void setMenu(ElaMenu* menu);
     void setElaIcon(ElaIconType::IconName icon);
     void setElaIcon(ElaIconType::IconName icon, int rotate);
+    void setElaIconColor(const QColor& color);
+    QColor getElaIconColor() const;
 
 protected:
     virtual bool eventFilter(QObject* watched, QEvent* event) override;

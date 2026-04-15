@@ -89,6 +89,23 @@ void ElaToolButton::setElaIcon(ElaIconType::IconName icon, int rotate)
     setProperty("ElaIconRotate", rotate);
 }
 
+void ElaToolButton::setElaIconColor(const QColor& color)
+{
+    Q_D(ElaToolButton);
+    if (d->_iconColor == color)
+    {
+        return;
+    }
+    d->_iconColor = color;
+    update();
+}
+
+QColor ElaToolButton::getElaIconColor() const
+{
+    Q_D(const ElaToolButton);
+    return d->_iconColor;
+}
+
 bool ElaToolButton::eventFilter(QObject* watched, QEvent* event)
 {
     Q_D(ElaToolButton);
