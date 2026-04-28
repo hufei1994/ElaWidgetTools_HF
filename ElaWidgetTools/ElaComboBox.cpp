@@ -51,7 +51,8 @@ ElaComboBox::ElaComboBox(QWidget* parent)
             layout->takeAt(0);
         }
         layout->addWidget(view());
-        layout->setContentsMargins(6, 0, 6, 6);
+        layout->setContentsMargins(ElaComboBoxStyle::bodyInset(), 0,
+                                   ElaComboBoxStyle::bodyInset(), 6);
 #ifndef Q_OS_WIN
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         container->setStyleSheet("background-color:transparent;");
@@ -143,7 +144,8 @@ void ElaComboBox::showPopup()
         markAnimation->setDuration(300);
         markAnimation->setEasingCurve(QEasingCurve::InOutSine);
         markAnimation->setStartValue(d->_comboBoxStyle->getExpandMarkWidth());
-        markAnimation->setEndValue(width() / 2 - d->_pBorderRadius - 6);
+        markAnimation->setEndValue(width() / 2 - d->_pBorderRadius -
+                                   ElaComboBoxStyle::bodyInset());
         markAnimation->start(QAbstractAnimation::DeleteWhenStopped);
     }
 }

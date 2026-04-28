@@ -20,6 +20,11 @@ ElaComboBoxStyle::~ElaComboBoxStyle()
 {
 }
 
+int ElaComboBoxStyle::bodyInset()
+{
+    return 1;
+}
+
 void ElaComboBoxStyle::drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget) const
 {
     switch (element)
@@ -64,7 +69,10 @@ void ElaComboBoxStyle::drawControl(ControlElement element, const QStyleOption* o
             painter->save();
             painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
             eTheme->drawEffectShadow(painter, viewRect, _shadowBorderWidth, 6);
-            QRect foregroundRect(viewRect.x() + _shadowBorderWidth, viewRect.y(), viewRect.width() - 2 * _shadowBorderWidth, viewRect.height() - _shadowBorderWidth);
+            const int inset = bodyInset();
+            QRect foregroundRect(viewRect.x() + inset, viewRect.y(),
+                                  viewRect.width() - 2 * inset,
+                                  viewRect.height() - _shadowBorderWidth);
             painter->setPen(ElaThemeColor(_themeMode, PopupBorder));
             painter->setBrush(ElaThemeColor(_themeMode, PopupBase));
             painter->drawRoundedRect(foregroundRect, 3, 3);
@@ -85,7 +93,8 @@ void ElaComboBoxStyle::drawControl(ControlElement element, const QStyleOption* o
             QRect optionRect = option->rect;
             optionRect.adjust(margin, margin, -margin, -margin);
 #ifndef Q_OS_WIN
-            optionRect.adjust(6, 0, -6, 0);
+            const int itemInset = bodyInset();
+            optionRect.adjust(itemInset, 0, -itemInset, 0);
 #endif
             path.addRoundedRect(optionRect, 5, 5);
             if (option->state & QStyle::State_Selected)
@@ -151,8 +160,8 @@ void ElaComboBoxStyle::drawComplexControl(ComplexControl control, const QStyleOp
                                       ? ElaThemeColor(_themeMode, BasicHover)
                                       : ElaThemeColor(_themeMode, BasicBase)
                                         : ElaThemeColor(_themeMode, BasicDisable));
-            QRect comboBoxRect = copt->rect;
-            comboBoxRect.adjust(_shadowBorderWidth, 1, -_shadowBorderWidth, -1);
+            const int inset = bodyInset();
+            QRect comboBoxRect = copt->rect.adjusted(inset, inset, -inset, -inset);
             painter->drawRoundedRect(comboBoxRect, 3, 3);
             // 底边线绘制
             painter->setPen(ElaThemeColor(_themeMode, BasicBaseLine));
@@ -206,8 +215,9 @@ QRect ElaComboBoxStyle::subControlRect(ComplexControl cc, const QStyleOptionComp
         {
             //文字区域
             QRect textRect = QProxyStyle::subControlRect(cc, opt, sc, widget);
-            textRect.setLeft(16);
-            textRect.setRight(textRect.right() - 15);
+            const int visualDelta = _shadowBorderWidth - bodyInset();
+            textRect.setLeft(16 - visualDelta);
+            textRect.setRight(textRect.right() - 15 + visualDelta);
             return textRect;
         }
         case QStyle::SC_ScrollBarAddPage:
@@ -215,6 +225,7 @@ QRect ElaComboBoxStyle::subControlRect(ComplexControl cc, const QStyleOptionComp
             //展开图标区域
             QRect expandIconRect = QProxyStyle::subControlRect(cc, opt, sc, widget);
             expandIconRect.setLeft(expandIconRect.left() - 25);
+            expandIconRect.translate(_shadowBorderWidth - bodyInset(), 0);
             return expandIconRect;
         }
         default:
