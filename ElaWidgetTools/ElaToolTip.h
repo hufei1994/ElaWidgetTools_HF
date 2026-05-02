@@ -13,6 +13,7 @@ class ELA_EXPORT ElaToolTip : public QWidget
     Q_PROPERTY_CREATE_Q_H(int, DisplayMsec)
     Q_PROPERTY_CREATE_Q_H(int, ShowDelayMsec)
     Q_PROPERTY_CREATE_Q_H(int, HideDelayMsec)
+    Q_PROPERTY_CREATE_Q_H(int, FontPixelSize)
     Q_PROPERTY_CREATE_Q_H(QString, ToolTip)
     Q_PROPERTY_CREATE_Q_H(QWidget*, CustomWidget)
 public:

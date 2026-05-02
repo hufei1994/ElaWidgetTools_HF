@@ -15,6 +15,7 @@ class ElaToolTipPrivate : public QObject
     Q_PROPERTY_CREATE_D(int, DisplayMsec)
     Q_PROPERTY_CREATE_D(int, ShowDelayMsec)
     Q_PROPERTY_CREATE_D(int, HideDelayMsec)
+    Q_PROPERTY_CREATE_D(int, FontPixelSize)
     Q_PROPERTY_CREATE_D(QString, ToolTip)
     Q_PROPERTY_CREATE_D(QWidget*, CustomWidget)
     Q_PROPERTY_CREATE(qreal, Opacity)
