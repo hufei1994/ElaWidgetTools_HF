@@ -18,6 +18,7 @@
 #include <QPainter>
 #include <QPropertyAnimation>
 #include <QScreen>
+#include <QSizePolicy>
 #include <QTimer>
 #include <QVBoxLayout>
 
@@ -166,6 +167,12 @@ ElaAppBar::ElaAppBar(QWidget* parent)
     leftLayout->addLayout(d->_createVLayout(d->_navigationButton));
     leftLayout->addLayout(d->_iconLabelLayout);
     leftLayout->addLayout(d->_titleLabelLayout);
+    auto titleTrailingWidget = new QWidget(this);
+    titleTrailingWidget->setVisible(false);
+    d->_titleTrailingWidget = titleTrailingWidget;
+    d->_titleTrailingWidgetLayout = d->_createVLayout(titleTrailingWidget);
+    d->_titleTrailingWidgetLayout->setContentsMargins(4, 0, 0, 0);
+    leftLayout->addLayout(d->_titleTrailingWidgetLayout);
     d->_mainLayout->addLayout(leftLayout);
 
     auto leftAreaWidget = new QWidget(this);
@@ -271,6 +278,45 @@ QWidget* ElaAppBar::getCustomWidget(ElaAppBarType::CustomArea customArea) const
     Q_D(const ElaAppBar);
     int customAreaIndex = (int)customArea - 1;
     return d->_customAreaWidgetList[customAreaIndex];
+}
+
+void ElaAppBar::setTitleTrailingWidget(QWidget* widget, QObject* hitTestObject, const QString& hitTestFunctionName)
+{
+    Q_D(ElaAppBar);
+    if (!widget || widget == this || !d->_titleTrailingWidgetLayout)
+    {
+        return;
+    }
+
+    // This opt-in area keeps the default AppBar layout unchanged until a caller explicitly uses it.
+    if (d->_titleTrailingWidget == widget)
+    {
+        d->_titleTrailingHitTestObject = hitTestObject;
+        d->_titleTrailingHitTestFunctionName = hitTestFunctionName;
+        widget->setVisible(true);
+        return;
+    }
+    if (d->_titleTrailingWidget && d->_titleTrailingWidget != widget)
+    {
+        d->_titleTrailingWidgetLayout->removeWidget(d->_titleTrailingWidget);
+        d->_titleTrailingWidget->setVisible(false);
+    }
+    widget->setMinimumHeight(0);
+    widget->setMaximumHeight(height());
+    widget->setParent(this);
+    widget->setVisible(true);
+    d->_titleLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    d->_titleTrailingWidgetLayout->insertWidget(0, widget);
+    d->_titleTrailingWidget = widget;
+    d->_titleTrailingHitTestObject = hitTestObject;
+    d->_titleTrailingHitTestFunctionName = hitTestFunctionName;
+    Q_EMIT customWidgetChanged();
+}
+
+QWidget* ElaAppBar::getTitleTrailingWidget() const
+{
+    Q_D(const ElaAppBar);
+    return d->_titleTrailingWidget;
 }
 
 void ElaAppBar::setCustomMenu(QMenu* customMenu)

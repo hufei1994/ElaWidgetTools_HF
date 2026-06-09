@@ -34,6 +34,7 @@ private:
     QHBoxLayout* _mainLayout{nullptr};
     QVBoxLayout* _iconLabelLayout{nullptr};
     QVBoxLayout* _titleLabelLayout{nullptr};
+    QVBoxLayout* _titleTrailingWidgetLayout{nullptr};
     ElaAppBarType::ButtonFlags _buttonFlags;
     ElaToolButton* _routeBackButton{nullptr};
     ElaToolButton* _routeForwardButton{nullptr};
@@ -49,6 +50,9 @@ private:
     QList<QWidget*> _clientWidgetList;
     QScreen* _lastScreen{nullptr};
     ElaText* _titleLabel{nullptr};
+    QWidget* _titleTrailingWidget{nullptr};
+    QObject* _titleTrailingHitTestObject{nullptr};
+    QString _titleTrailingHitTestFunctionName;
     QLabel* _iconLabel{nullptr};
     qint64 _currentWinID{0};
     int _lastMinTrackWidth{0};

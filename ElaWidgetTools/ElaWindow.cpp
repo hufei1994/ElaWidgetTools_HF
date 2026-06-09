@@ -185,6 +185,19 @@ QWidget* ElaWindow::getCustomWidget(ElaAppBarType::CustomArea customArea) const
     return d->_appBar->getCustomWidget(customArea);
 }
 
+void ElaWindow::setTitleTrailingWidget(QWidget* customWidget, QObject* hitTestObject, const QString& hitTestFunctionName)
+{
+    Q_D(ElaWindow);
+    d->_appBar->setTitleTrailingWidget(customWidget, hitTestObject, hitTestFunctionName);
+    Q_EMIT customWidgetChanged();
+}
+
+QWidget* ElaWindow::getTitleTrailingWidget() const
+{
+    Q_D(const ElaWindow);
+    return d->_appBar->getTitleTrailingWidget();
+}
+
 void ElaWindow::setCentralCustomWidget(QWidget* customWidget)
 {
     Q_D(ElaWindow);

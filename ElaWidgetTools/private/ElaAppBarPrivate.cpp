@@ -219,6 +219,16 @@ bool ElaAppBarPrivate::_containsCursorToItem(QWidget* item)
                 }
             }
         }
+        if (_containsCursorToItem(_titleTrailingWidget))
+        {
+            if (_titleTrailingHitTestObject)
+            {
+                bool isContainsInAppBar = false;
+                QMetaObject::invokeMethod(_titleTrailingHitTestObject, _titleTrailingHitTestFunctionName.toLocal8Bit().constData(), Qt::AutoConnection, Q_RETURN_ARG(bool, isContainsInAppBar));
+                return isContainsInAppBar;
+            }
+            return false;
+        }
     }
     else if (item == _maxButton)
     {
@@ -251,6 +261,11 @@ int ElaAppBarPrivate::_calculateMinimumWidth()
     {
         width += _titleLabel->width();
         width += 10;
+    }
+    if (_titleTrailingWidget && _titleTrailingWidget->isVisible())
+    {
+        width += _titleTrailingWidget->minimumWidth();
+        width += 4;
     }
     if (_iconLabel->isVisible())
     {

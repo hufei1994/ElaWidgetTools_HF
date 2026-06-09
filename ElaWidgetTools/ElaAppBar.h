@@ -64,6 +64,8 @@ public:
 
     void setCustomWidget(ElaAppBarType::CustomArea customArea, QWidget* customWidget, QObject* hitTestObject = nullptr, const QString& hitTestFunctionName = "");
     QWidget* getCustomWidget(ElaAppBarType::CustomArea customArea) const;
+    void setTitleTrailingWidget(QWidget* customWidget, QObject* hitTestObject = nullptr, const QString& hitTestFunctionName = "");
+    QWidget* getTitleTrailingWidget() const;
 
     void setCustomMenu(QMenu* customMenu);
     QMenu* getCustomMenu() const;
