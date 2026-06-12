@@ -6,6 +6,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPropertyAnimation>
+#include <QScreen>
 
 #include "DeveloperComponents/ElaComboBoxView.h"
 #include "ElaApplication.h"
@@ -222,17 +223,32 @@ void ElaMultiSelectComboBox::showPopup()
         QWidget* container = this->findChild<QFrame*>();
         if (container)
         {
-            int containerHeight = 0;
-            if (count() >= maxVisibleItems())
+            const int preferredContainerHeight = qMin(count(), maxVisibleItems()) * 35 + 8;
+            const QPoint comboTopLeft = mapToGlobal(QPoint(0, 0));
+            QScreen* popupScreen = nullptr;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+            if (window())
             {
-                containerHeight = maxVisibleItems() * 35 + 8;
+                popupScreen = window()->screen();
             }
-            else
+#endif
+            if (!popupScreen)
             {
-                containerHeight = count() * 35 + 8;
+                popupScreen = QApplication::screenAt(comboTopLeft);
             }
-            view()->resize(view()->width(), containerHeight - 8);
-            container->move(mapToGlobal(QPoint(0, height() + 3)));
+            if (!popupScreen)
+            {
+                popupScreen = QApplication::primaryScreen();
+            }
+            const QRect availableRect = popupScreen ? popupScreen->availableGeometry() : QRect(comboTopLeft, QSize(width(), preferredContainerHeight + height() + 3));
+            const int spaceBelow = availableRect.bottom() - (comboTopLeft.y() + height() + 3) + 1;
+            const int spaceAbove = comboTopLeft.y() - availableRect.top();
+            d->_isPopupOpenUpward = spaceBelow < preferredContainerHeight && spaceAbove > spaceBelow;
+            const int availableHeight = qMax(1, d->_isPopupOpenUpward ? spaceAbove : spaceBelow);
+            const int containerHeight = qMax(1, qMin(preferredContainerHeight, availableHeight));
+            const int viewHeight = qMax(1, containerHeight - 8);
+            view()->resize(view()->width(), viewHeight);
+            container->move(QPoint(comboTopLeft.x(), d->_isPopupOpenUpward ? comboTopLeft.y() + 2 : comboTopLeft.y() + height() + 3));
             QLayout* layout = container->layout();
             while (layout->count())
             {
@@ -240,7 +256,12 @@ void ElaMultiSelectComboBox::showPopup()
             }
             QPropertyAnimation* fixedSizeAnimation = new QPropertyAnimation(container, "maximumHeight");
             connect(fixedSizeAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
-                container->setFixedHeight(value.toUInt());
+                const int popupHeight = qMax(1, value.toInt());
+                container->setFixedHeight(popupHeight);
+                if (d->_isPopupOpenUpward)
+                {
+                    container->move(QPoint(comboTopLeft.x(), comboTopLeft.y() + 3 - popupHeight));
+                }
             });
             fixedSizeAnimation->setStartValue(1);
             fixedSizeAnimation->setEndValue(containerHeight);
@@ -254,7 +275,8 @@ void ElaMultiSelectComboBox::showPopup()
                 layout->addWidget(view());
             });
             QPoint viewPos = view()->pos();
-            viewPosAnimation->setStartValue(QPoint(viewPos.x(), viewPos.y() - view()->height()));
+            const int showSlideOffset = d->_isPopupOpenUpward ? view()->height() : -view()->height();
+            viewPosAnimation->setStartValue(QPoint(viewPos.x(), viewPos.y() + showSlideOffset));
             viewPosAnimation->setEndValue(viewPos);
             viewPosAnimation->setEasingCurve(QEasingCurve::OutCubic);
             viewPosAnimation->setDuration(400);
@@ -298,9 +320,10 @@ void ElaMultiSelectComboBox::hidePopup()
         if (d->_isAllowHidePopup)
         {
             QWidget* container = this->findChild<QFrame*>();
-            int containerHeight = container->height();
             if (container)
             {
+                const QPoint comboTopLeft = mapToGlobal(QPoint(0, 0));
+                int containerHeight = container->height();
                 QLayout* layout = container->layout();
                 while (layout->count())
                 {
@@ -319,13 +342,19 @@ void ElaMultiSelectComboBox::hidePopup()
                     view()->move(viewPos);
                 });
                 viewPosAnimation->setStartValue(viewPos);
-                viewPosAnimation->setEndValue(QPoint(viewPos.x(), viewPos.y() - view()->height()));
+                const int hideSlideOffset = d->_isPopupOpenUpward ? view()->height() : -view()->height();
+                viewPosAnimation->setEndValue(QPoint(viewPos.x(), viewPos.y() + hideSlideOffset));
                 viewPosAnimation->setEasingCurve(QEasingCurve::InCubic);
                 viewPosAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 
                 QPropertyAnimation* fixedSizeAnimation = new QPropertyAnimation(container, "maximumHeight");
                 connect(fixedSizeAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
-                    container->setFixedHeight(value.toUInt());
+                    const int popupHeight = qMax(1, value.toInt());
+                    container->setFixedHeight(popupHeight);
+                    if (d->_isPopupOpenUpward)
+                    {
+                        container->move(QPoint(comboTopLeft.x(), comboTopLeft.y() + 3 - popupHeight));
+                    }
                 });
                 fixedSizeAnimation->setStartValue(container->height());
                 fixedSizeAnimation->setEndValue(1);

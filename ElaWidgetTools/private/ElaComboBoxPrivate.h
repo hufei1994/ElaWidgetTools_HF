@@ -22,6 +22,7 @@ public:
 
 private:
     bool _isAllowHidePopup{false};
+    bool _isPopupOpenUpward{false};
     ElaComboBoxStyle* _comboBoxStyle{nullptr};
     ElaThemeType::ThemeMode _themeMode;
 };

@@ -25,6 +25,7 @@ private:
     QVector<bool> _itemSelection;
     bool _isFirstPopup{false};
     bool _isAllowHidePopup{false};
+    bool _isPopupOpenUpward{false};
     QString _currentText;
     QStringList _selectedTextList;
     void _refreshCurrentIndexs();
