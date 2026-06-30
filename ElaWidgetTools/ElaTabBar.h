@@ -23,6 +23,10 @@ Q_SIGNALS:
 
 protected:
     QSize sizeHint() const;
+    QSize tabSizeHint(int index) const override;
+    void resizeEvent(QResizeEvent* event) override;
+    void tabInserted(int index) override;
+    void tabRemoved(int index) override;
     virtual void mouseMoveEvent(QMouseEvent* event) override;
     virtual void mouseDoubleClickEvent(QMouseEvent* event) override;
     virtual void dragEnterEvent(QDragEnterEvent* event) override;
@@ -35,6 +39,7 @@ protected:
 private:
     void startEditing(int index);
     void commitEditing(bool save = true);
+    void updateCloseButtonVisibility();
 };
 
 #endif // ELATABBAR_H

@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QStyleOption>
+#include <QtMath>
 
 #include "ElaTheme.h"
 ElaTabBarStyle::ElaTabBarStyle(QStyle* style)
@@ -31,10 +32,46 @@ void ElaTabBarStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption* opt,
     }
     case QStyle::PE_IndicatorArrowLeft:
     {
+        p->save();
+        p->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+        p->setPen(Qt::NoPen);
+        if (opt->state.testFlag(QStyle::State_MouseOver)) {
+            p->setBrush(ElaThemeColor(_themeMode, BasicHoverAlpha));
+            p->drawRoundedRect(opt->rect.adjusted(1, 1, -1, -1), 3, 3);
+        }
+        const int sideLength = qMin(8, qMax(4, opt->rect.height() - 10));
+        const QPointF center = opt->rect.center();
+        QPainterPath arrowPath;
+        arrowPath.moveTo(center.x() - qCos(30 * M_PI / 180.0) * sideLength / 2.0, center.y());
+        arrowPath.lineTo(center.x() + qCos(30 * M_PI / 180.0) * sideLength / 2.0, center.y() + sideLength / 2.0);
+        arrowPath.lineTo(center.x() + qCos(30 * M_PI / 180.0) * sideLength / 2.0, center.y() - sideLength / 2.0);
+        arrowPath.closeSubpath();
+        p->setPen(Qt::NoPen);
+        p->setBrush(opt->state.testFlag(QStyle::State_Enabled) ? ElaThemeColor(_themeMode, BasicText) : ElaThemeColor(_themeMode, BasicTextDisable));
+        p->drawPath(arrowPath);
+        p->restore();
         return;
     }
     case QStyle::PE_IndicatorArrowRight:
     {
+        p->save();
+        p->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+        p->setPen(Qt::NoPen);
+        if (opt->state.testFlag(QStyle::State_MouseOver)) {
+            p->setBrush(ElaThemeColor(_themeMode, BasicHoverAlpha));
+            p->drawRoundedRect(opt->rect.adjusted(1, 1, -1, -1), 3, 3);
+        }
+        const int sideLength = qMin(8, qMax(4, opt->rect.height() - 10));
+        const QPointF center = opt->rect.center();
+        QPainterPath arrowPath;
+        arrowPath.moveTo(center.x() + qCos(30 * M_PI / 180.0) * sideLength / 2.0, center.y());
+        arrowPath.lineTo(center.x() - qCos(30 * M_PI / 180.0) * sideLength / 2.0, center.y() + sideLength / 2.0);
+        arrowPath.lineTo(center.x() - qCos(30 * M_PI / 180.0) * sideLength / 2.0, center.y() - sideLength / 2.0);
+        arrowPath.closeSubpath();
+        p->setPen(Qt::NoPen);
+        p->setBrush(opt->state.testFlag(QStyle::State_Enabled) ? ElaThemeColor(_themeMode, BasicText) : ElaThemeColor(_themeMode, BasicTextDisable));
+        p->drawPath(arrowPath);
+        p->restore();
         return;
     }
     case QStyle::PE_PanelButtonTool:
@@ -204,8 +241,6 @@ QRect ElaTabBarStyle::subElementRect(SubElement element, const QStyleOption* opt
 {
     switch (element)
     {
-    case QStyle::SE_TabBarScrollLeftButton:
-    case QStyle::SE_TabBarScrollRightButton:
     case QStyle::SE_TabBarTearIndicatorLeft:
     case QStyle::SE_TabBarTearIndicatorRight:
     {

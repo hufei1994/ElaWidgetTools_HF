@@ -4,6 +4,7 @@
 #include <QDrag>
 #include <QMimeData>
 #include <QMouseEvent>
+#include <QStyleOptionTab>
 #include "ElaLineEdit.h"
 #include "ElaTabWidget.h"
 
@@ -22,6 +23,8 @@ ElaTabBar::ElaTabBar(QWidget* parent)
     setTabsClosable(true);
     setMovable(true);
     setAcceptDrops(true);
+    setExpanding(false);
+    setUsesScrollButtons(true);
     d->_style = new ElaTabBarStyle(style());
     setStyle(d->_style);
     d->_tabBarPrivate = dynamic_cast<QTabBarPrivate*>(this->QTabBar::d_ptr.data());
@@ -59,10 +62,37 @@ bool ElaTabBar::getEnableRenaming() const
 
 QSize ElaTabBar::sizeHint() const
 {
-    QSize oldSize = QTabBar::sizeHint();
-    QSize newSize = oldSize;
-    newSize.setWidth(parentWidget()->maximumWidth());
-    return oldSize.expandedTo(newSize);
+    Q_D(const ElaTabBar);
+    QSize hint = QTabBar::sizeHint();
+    const QSize tabSize = d->_style->getTabSize();
+    hint.setWidth(count() * tabSize.width());
+    hint.setHeight(tabSize.height());
+    return hint;
+}
+
+QSize ElaTabBar::tabSizeHint(int index) const
+{
+    Q_UNUSED(index);
+    Q_D(const ElaTabBar);
+    return d->_style->getTabSize();
+}
+
+void ElaTabBar::resizeEvent(QResizeEvent* event)
+{
+    QTabBar::resizeEvent(event);
+    updateCloseButtonVisibility();
+}
+
+void ElaTabBar::tabInserted(int index)
+{
+    QTabBar::tabInserted(index);
+    updateCloseButtonVisibility();
+}
+
+void ElaTabBar::tabRemoved(int index)
+{
+    QTabBar::tabRemoved(index);
+    updateCloseButtonVisibility();
 }
 
 void ElaTabBar::mouseMoveEvent(QMouseEvent* event)
@@ -254,16 +284,40 @@ void ElaTabBar::wheelEvent(QWheelEvent* event)
 
 void ElaTabBar::paintEvent(QPaintEvent* event)
 {
-    Q_D(ElaTabBar);
-    QSize tabSize = d->_style->getTabSize();
-    for (int i = 0; i < d->_tabBarPrivate->tabList.size(); i++)
-    {
-#if (QT_VERSION > QT_VERSION_CHECK(6, 0, 0))
-        d->_tabBarPrivate->tabList[i]->rect = QRect(tabSize.width() * i, d->_tabBarPrivate->tabList[i]->rect.y(), tabSize.width(), tabSize.height());
-#else
-        d->_tabBarPrivate->tabList[i].rect = QRect(tabSize.width() * i, d->_tabBarPrivate->tabList[i].rect.y(), tabSize.width(), tabSize.height());
-#endif
-    }
-    d->_tabBarPrivate->layoutWidgets();
     QTabBar::paintEvent(event);
+    updateCloseButtonVisibility();
+}
+
+void ElaTabBar::updateCloseButtonVisibility()
+{
+    Q_D(const ElaTabBar);
+    const QSize tabSize = d->_style->getTabSize();
+    const bool hasOverflowScroller = usesScrollButtons() && count() * tabSize.width() > width();
+    QRect visibleCloseArea = rect();
+    if (hasOverflowScroller) {
+        const int scrollerReserveWidth = 44;
+        visibleCloseArea.setRight(visibleCloseArea.right() - scrollerReserveWidth);
+    }
+
+    for (int i = 0; i < count(); ++i) {
+        QWidget* rightButton = tabButton(i, QTabBar::RightSide);
+        if (!rightButton) {
+            continue;
+        }
+        if (!tabsClosable()) {
+            if (rightButton->isVisible()) rightButton->setVisible(false);
+            continue;
+        }
+        bool shouldShow = true;
+        if (hasOverflowScroller) {
+            QStyleOptionTab tabOption;
+            initStyleOption(&tabOption, i);
+            const QRect closeButtonRect = style()->subElementRect(QStyle::SE_TabBarTabRightButton, &tabOption, this);
+            const QPoint closeButtonCenter = closeButtonRect.center();
+            shouldShow = !closeButtonRect.isEmpty() && visibleCloseArea.contains(closeButtonCenter) && tabRect(i).contains(closeButtonCenter);
+        }
+        if (rightButton->isVisible() != shouldShow) {
+            rightButton->setVisible(shouldShow);
+        }
+    }
 }
