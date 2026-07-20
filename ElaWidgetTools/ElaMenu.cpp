@@ -1,4 +1,4 @@
-﻿#include "ElaMenu.h"
+#include "ElaMenu.h"
 
 #include <QApplication>
 #include <QCloseEvent>
@@ -19,6 +19,8 @@ ElaMenu::ElaMenu(QWidget* parent)
     setAttribute(Qt::WA_TranslucentBackground);
     setObjectName("ElaMenu");
     d->_menuStyle = new ElaMenuStyle(style());
+    // 延长 Style 生命周期，确保 QMenu 析构并释放 QWidgetAction 时继承的样式仍然有效。
+    d->_menuStyle->setParent(this);
     setStyle(d->_menuStyle);
     d->_pAnimationImagePosY = 0;
 }
@@ -31,8 +33,7 @@ ElaMenu::ElaMenu(const QString& title, QWidget* parent)
 
 ElaMenu::~ElaMenu()
 {
-    Q_D(ElaMenu);
-    delete d->_menuStyle;
+    // ElaMenuStyle 由 QObject 父子关系在基类完成 QWidgetAction 清理后自动释放。
 }
 
 void ElaMenu::setMenuItemHeight(int menuItemHeight)
