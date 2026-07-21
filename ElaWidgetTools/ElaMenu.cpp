@@ -117,14 +117,15 @@ void ElaMenu::mouseReleaseEvent(QMouseEvent* event)
 {
     QAction* action = actionAt(event->pos());
     if (!action || event->button() != Qt::LeftButton ||
-        !action->property("ElaMenuKeepOpenOnTrigger").toBool() || !action->isEnabled() ||
-        !action->isCheckable())
+        !action->property("ElaMenuKeepOpenOnTrigger").toBool() || !action->isEnabled())
     {
         QMenu::mouseReleaseEvent(event);
         return;
     }
+
+    // 统一走 QAction 的原生触发路径：独占组保持单选，未分组动作仍可自由多选。
     setActiveAction(action);
-    action->toggle();
+    action->trigger();
     update(actionGeometry(action));
     event->accept();
 }
