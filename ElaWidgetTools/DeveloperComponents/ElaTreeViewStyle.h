@@ -9,6 +9,8 @@ class ElaTreeViewStyle : public QProxyStyle
     Q_OBJECT
     Q_PROPERTY_CREATE(int, ItemHeight)
     Q_PROPERTY_CREATE(int, HeaderMargin)
+    // 保存 PE_IndicatorBranch 使用的图标字体大小。
+    Q_PROPERTY_CREATE(int, BranchIndicatorSize)
 public:
     explicit ElaTreeViewStyle(QStyle* style = nullptr);
     ~ElaTreeViewStyle();

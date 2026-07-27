@@ -73,3 +73,24 @@ int ElaTreeView::getHeaderMargin() const
     Q_D(const ElaTreeView);
     return d->_treeViewStyle->getHeaderMargin();
 }
+
+// 设置折叠/展开箭头的像素大小，并立即刷新当前树视口。
+void ElaTreeView::setBranchIndicatorSize(int branchIndicatorSize)
+{
+    Q_D(ElaTreeView);
+    if (branchIndicatorSize <= 0 || d->_treeViewStyle->getBranchIndicatorSize() == branchIndicatorSize)
+    {
+        return;
+    }
+    d->_treeViewStyle->setBranchIndicatorSize(branchIndicatorSize);
+    doItemsLayout();
+    viewport()->update();
+    Q_EMIT pBranchIndicatorSizeChanged();
+}
+
+// 返回当前折叠/展开箭头的像素大小。
+int ElaTreeView::getBranchIndicatorSize() const
+{
+    Q_D(const ElaTreeView);
+    return d->_treeViewStyle->getBranchIndicatorSize();
+}

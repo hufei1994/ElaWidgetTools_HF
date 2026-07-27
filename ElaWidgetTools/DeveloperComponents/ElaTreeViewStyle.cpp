@@ -10,6 +10,7 @@ ElaTreeViewStyle::ElaTreeViewStyle(QStyle* style)
 {
     _pItemHeight = 35;
     _pHeaderMargin = 5;
+    _pBranchIndicatorSize = 17; // 保持现有 ElaTreeView 的默认箭头大小不变。
     _themeMode = eTheme->getThemeMode();
     connect(eTheme, &ElaTheme::themeModeChanged, this, [=](ElaThemeType::ThemeMode themeMode) {
         _themeMode = themeMode;
@@ -71,7 +72,7 @@ void ElaTreeViewStyle::drawPrimitive(PrimitiveElement element, const QStyleOptio
                 QRect indicatorRect = option->rect;
                 indicatorRect.adjust(0, 0, -2, 0);
                 QFont iconFont = QFont("ElaAwesome");
-                iconFont.setPixelSize(17);
+                iconFont.setPixelSize(_pBranchIndicatorSize);
                 painter->setFont(iconFont);
                 painter->setPen(ElaThemeColor(_themeMode, BasicText));
                 painter->drawText(indicatorRect, Qt::AlignVCenter | Qt::AlignRight, vopt->state.testFlag(QStyle::State_Open) ? QChar((unsigned short)ElaIconType::AngleDown) : QChar((unsigned short)ElaIconType::AngleRight));
