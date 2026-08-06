@@ -24,6 +24,28 @@ void ElaListViewStyle::drawPrimitive(PrimitiveElement element, const QStyleOptio
 {
     switch (element)
     {
+    case QStyle::PE_IndicatorItemViewItemDrop:
+    {
+        // 使用固定物理像素和主题文字色绘制拖放指示器。
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing, false);
+        QPen indicatorPen(ElaThemeColor(_themeMode, BasicText));
+        indicatorPen.setCosmetic(true); // 始终保持一个物理像素，不受高 DPI 缩放影响。
+        painter->setPen(indicatorPen);
+        painter->setBrush(Qt::NoBrush);
+
+        const QRect indicatorRect = option->rect;
+        if (indicatorRect.height() <= 1)
+        {
+            painter->drawLine(indicatorRect.left(), indicatorRect.top(), indicatorRect.right(), indicatorRect.top());
+        }
+        else
+        {
+            painter->drawRect(indicatorRect.adjusted(0, 0, -1, -1));
+        }
+        painter->restore();
+        return;
+    }
     case QStyle::PE_PanelItemViewItem:
     {
         // Item背景
