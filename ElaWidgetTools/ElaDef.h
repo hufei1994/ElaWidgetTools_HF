@@ -3608,7 +3608,14 @@ enum IconName
     SpdCtrlOff = 0xf4e6,
     TrqCtrlOn = 0xf4e7,
     TrqCtrlOff = 0xf4e8,
-    DeltaTime = 0xf4e9 
+    DeltaTime = 0xf4e9,
+    LayoutSidebarLeft = 0xf4ea,
+    LayoutSidebarLeftOff = 0xf4eb,
+    Layout = 0xf4ec,
+    LayoutPanel = 0xf4ed,
+    LayoutPanelOff = 0xf4ee,
+    LayoutSidebarRight = 0xf4ef,
+    LayoutSidebarRightOff = 0xf4f0
 };
 Q_ENUM_CREATE(IconName)
 Q_END_ENUM_CREATE(ElaIconType)
