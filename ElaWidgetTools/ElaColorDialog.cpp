@@ -95,11 +95,17 @@ ElaColorDialog::ElaColorDialog(QWidget* parent)
     htmlEditLayout->addWidget(d->_htmlEdit);
     htmlEditLayout->addStretch();
     d->_modeComboBox = new ElaComboBox(this);
-    d->_modeComboBox->setFixedSize(132, 33);
+    d->_modeComboBox->setFixedSize(120, 33);
     d->_modeComboBox->addItem("RGB");
     d->_modeComboBox->addItem("HSV");
     d->_modeComboBox->setCurrentIndex(0);
     connect(d->_modeComboBox, QOverload<int>::of(&ElaComboBox::currentIndexChanged), d, &ElaColorDialogPrivate::onColorModeChanged);
+    // 与HTML和三个分量输入框使用相同的6px左缩进及120px可视宽度。
+    QHBoxLayout* modeComboBoxLayout = new QHBoxLayout();
+    modeComboBoxLayout->setContentsMargins(0, 0, 0, 0);
+    modeComboBoxLayout->addSpacing(6);
+    modeComboBoxLayout->addWidget(d->_modeComboBox);
+    modeComboBoxLayout->addStretch();
 
     // R或H
     d->_firstEdit = new ElaLineEdit(this);
@@ -151,7 +157,7 @@ ElaColorDialog::ElaColorDialog(QWidget* parent)
     paramControlLayout->setContentsMargins(0, 0, 0, 0);
     paramControlLayout->setSpacing(10);
     paramControlLayout->addLayout(htmlEditLayout);
-    paramControlLayout->addWidget(d->_modeComboBox);
+    paramControlLayout->addLayout(modeComboBoxLayout);
     paramControlLayout->addLayout(firstEditLayout);
     paramControlLayout->addLayout(secondEditLayout);
     paramControlLayout->addLayout(thridEditLayout);

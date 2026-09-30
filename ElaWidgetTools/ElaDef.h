@@ -3615,7 +3615,16 @@ enum IconName
     LayoutPanel = 0xf4ed,
     LayoutPanelOff = 0xf4ee,
     LayoutSidebarRight = 0xf4ef,
-    LayoutSidebarRightOff = 0xf4f0
+    LayoutSidebarRightOff = 0xf4f0,
+    Fa5Spinner = 0xf4f1,
+    Fa5Heart = 0xf4f2,
+    Fa5Lightbulb = 0xf4f3,
+    Fa5Bell = 0xf4f4,
+    Fa5Star = 0xf4f5,
+    Fa5Certificate = 0xf4f6,
+    Fa5Square = 0xf4f7,
+    Fa5Crosshairs = 0xf4f8,
+    Fa5CircleNotch = 0xf4f9
 };
 Q_ENUM_CREATE(IconName)
 Q_END_ENUM_CREATE(ElaIconType)
