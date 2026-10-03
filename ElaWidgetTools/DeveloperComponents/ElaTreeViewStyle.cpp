@@ -11,6 +11,8 @@ ElaTreeViewStyle::ElaTreeViewStyle(QStyle* style)
     _pItemHeight = 35;
     _pHeaderMargin = 5;
     _pBranchIndicatorSize = 17; // 保持现有 ElaTreeView 的默认箭头大小不变。
+    _pItemContentLeftPadding = 11; // 保持其他 Ela 树的默认内容间距，只由目标树显式缩小。
+    _pSelectionIndicatorVisible = true; // 默认维持 Ela 原有选中竖线，仅在指定树实例中关闭。
     _themeMode = eTheme->getThemeMode();
     connect(eTheme, &ElaTheme::themeModeChanged, this, [=](ElaThemeType::ThemeMode themeMode) {
         _themeMode = themeMode;
@@ -228,11 +230,12 @@ void ElaTreeViewStyle::drawControl(ControlElement element, const QStyleOption* o
                 painter->setPen(ElaThemeColor(_themeMode, BasicText));
                 painter->drawText(textRect, vopt->displayAlignment, vopt->text);
             }
-            // 选中特效
+            // 选中竖线可以独立关闭，前面的选中背景和复选框绘制保持原样。
             int heightOffset = itemRect.height() / 4;
             painter->setPen(Qt::NoPen);
             painter->setBrush(ElaThemeColor(_themeMode, PrimaryNormal));
-            if (vopt->state.testFlag(QStyle::State_Selected) && (vopt->viewItemPosition == QStyleOptionViewItem::Beginning || vopt->viewItemPosition == QStyleOptionViewItem::OnlyOne))
+            if (_pSelectionIndicatorVisible && vopt->state.testFlag(QStyle::State_Selected) &&
+                (vopt->viewItemPosition == QStyleOptionViewItem::Beginning || vopt->viewItemPosition == QStyleOptionViewItem::OnlyOne))
             {
                 painter->drawRoundedRect(QRectF(itemRect.x() + 3, itemRect.y() + heightOffset, 3, itemRect.height() - 2 * heightOffset), 3, 3);
             }
@@ -293,7 +296,7 @@ QRect ElaTreeViewStyle::subElementRect(SubElement element, const QStyleOption* o
             if (vopt->viewItemPosition != QStyleOptionViewItem::Middle && vopt->viewItemPosition != QStyleOptionViewItem::End)
             {
                 QRect indicatorRect = QProxyStyle::subElementRect(element, option, widget);
-                indicatorRect.adjust(_leftPadding, 0, _leftPadding, 0);
+                indicatorRect.adjust(_pItemContentLeftPadding, 0, _pItemContentLeftPadding, 0); // 复选框与后方内容同步移动，绘制和点击热区共用此位置。
                 return indicatorRect;
             }
         }
@@ -306,7 +309,7 @@ QRect ElaTreeViewStyle::subElementRect(SubElement element, const QStyleOption* o
             if (vopt->viewItemPosition != QStyleOptionViewItem::Middle && vopt->viewItemPosition != QStyleOptionViewItem::End)
             {
                 QRect iconRect = QProxyStyle::subElementRect(element, option, widget);
-                iconRect.adjust(_leftPadding + 5, 0, _leftPadding + 5, 0);
+                iconRect.adjust(_pItemContentLeftPadding + 5, 0, _pItemContentLeftPadding + 5, 0); // 保留原有复选框到图标的间距，色卡绘制与命中位置同步。
                 return iconRect;
             }
         }
@@ -319,7 +322,7 @@ QRect ElaTreeViewStyle::subElementRect(SubElement element, const QStyleOption* o
             if (vopt->viewItemPosition != QStyleOptionViewItem::Middle && vopt->viewItemPosition != QStyleOptionViewItem::End)
             {
                 QRect textRect = QProxyStyle::subElementRect(element, option, widget);
-                textRect.adjust(_leftPadding + 10, 0, 0, 0);
+                textRect.adjust(_pItemContentLeftPadding + 10, 0, 0, 0); // 保留原有图标到文字的间距，行背景仍使用未移动的整行矩形。
                 return textRect;
             }
         }

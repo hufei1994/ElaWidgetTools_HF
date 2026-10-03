@@ -11,6 +11,10 @@ class ElaTreeViewStyle : public QProxyStyle
     Q_PROPERTY_CREATE(int, HeaderMargin)
     // 保存 PE_IndicatorBranch 使用的图标字体大小。
     Q_PROPERTY_CREATE(int, BranchIndicatorSize)
+    // 行内内容共用左内边距，默认保留原有 11 像素，不改变各元素之间的间距。
+    Q_PROPERTY_CREATE(int, ItemContentLeftPadding)
+    // 默认显示选中竖线，可由特定树关闭而保留选中背景。
+    Q_PROPERTY_CREATE(bool, SelectionIndicatorVisible)
 public:
     explicit ElaTreeViewStyle(QStyle* style = nullptr);
     ~ElaTreeViewStyle();
@@ -22,7 +26,6 @@ public:
 
 private:
     ElaThemeType::ThemeMode _themeMode;
-    int _leftPadding{11};
 };
 
 #endif // ELATREEVIEWSTYLE_H
